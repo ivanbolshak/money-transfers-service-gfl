@@ -1,0 +1,104 @@
+###
+POST http://localhost:8080/rest/api/v1/account/transfer/pool
+Content-Type: application/json
+
+{
+  "amount": 3,
+  "cur-dig-code": 840,
+  "dest-account-serial": "AABB1122",
+  "src-account-serial" : "AADD1133"
+}
+
+<> 2023-11-13T233033.200.json
+<> 2023-11-13T232808.500.txt
+<> 2023-11-13T232313.500.txt
+<> 2023-11-13T231758.200.json
+<> 2023-11-13T231753.200.json
+<> 2023-11-13T230747.200.json
+<> 2023-11-13T225350.200.json
+<> 2023-11-13T225344.200.json
+<> 2023-11-13T224741.500.txt
+<> 2023-11-13T223446.500.txt
+<> 2023-11-13T223222.500.txt
+<> 2023-11-13T223205.500.txt
+<> 2023-11-13T223127.400.json
+<> 2023-11-13T223120.200.json
+<> 2023-11-13T223016.500.txt
+<> 2023-11-13T135722.200.json
+<> 2023-11-13T135647.200.json
+<> 2023-11-13T135544.200.json
+<> 2023-11-13T135523.200.json
+<> 2023-11-13T135442.200.json
+<> 2023-11-13T085300.200.json
+<> 2023-11-13T085235.200.json
+<> 2023-11-13T085219.200.json
+<> 2023-11-13T084727.200.json
+<> 2023-11-13T084711.200.json
+<> 2023-11-13T084702.200.json
+<> 2023-11-13T084619.200.json
+<> 2023-11-13T082134.200.json
+<> 2023-11-13T081751.200.json
+<> 2023-11-13T081733.200.json
+<> 2023-11-12T222646.200.json
+
+
+
+
+###
+GET http://localhost:8080/rest/api/v1/account/details/AABB1122
+
+<> 2023-11-13T233036.200.json
+<> 2023-11-13T233029.200.json
+<> 2023-11-13T223707.500.txt
+<> 2023-11-13T223656.200.json
+<> 2023-11-13T082525.200.json
+<> 2023-11-13T082515.500.json
+<> 2023-11-13T082335.200.json
+<> 2023-11-13T082228.200.json
+<> 2023-11-13T082219.200.json
+<> 2023-11-13T082140.200.json
+<> 2023-11-13T081838.200.json
+<> 2023-11-13T081801.404.json
+<> 2023-11-12T222613.500.json
+
+
+
+
+###
+POST http://localhost:8080/rest/api/v1/account
+Content-Type: application/json
+
+{
+  "serial": "XXOO0099",
+  "balance": 0,
+  "currencyDigitalCode": 840,
+  "user-uuid": "f5b71c77-157e-40aa-9c8d-d02426984d3b"
+}
+
+<> 2023-11-13T082206.200.json
+<> 2023-11-13T081901.200.json
+
+###
+DELETE http://localhost:8080/rest/api/v1/account/XXOO0099
+
+<> 2023-11-13T081912.404.json
+
+###
+POST http://localhost:8080/rest/api/v1/user
+Content-Type: application/json
+
+{
+  "first-name": "UserOOO",
+  "last-name": "UserOOO",
+  "email": "userOOO@gmail.com",
+  "uuid": "333284c9-b0dc-4892-aa15-92ebf91601f7"
+}
+
+<> 2023-11-13T082006.200.json
+
+###
+GET http://localhost:8080/v3/api-docs
+
+<> 2023-11-13T082549.200.json
+<> 2023-11-13T082016.200.json
+<> 2023-11-12T222636.200.json

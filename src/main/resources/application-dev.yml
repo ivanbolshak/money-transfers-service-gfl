@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: "jdbc:postgresql://127.0.0.1:5432/money_transfer"
+    username: "techuser"
+    platform: "postgresql"
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate.ddl-auto: validate
+    show-sql: true
+  flyway:
+    enabled: true
+
+
+retry:
+  transfer:
+    maxAttempts: 10
+
+app-transfer:
+  transfers-pool-size: "10"
+  pool-time-out: "1000"
+
+logging:
+  level:
+    com.transfer.services.impl.TransferPoolThreadsServiceImpl: DEBUG

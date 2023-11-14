@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: "jdbc:postgresql://{url}:5432/{db_name}"
+    username: "{username}"
+    platform: "{platform}"
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 5
+      minimum-idle: 2
+      maximum-pool-size: 5
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate.ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    connect-retries: 3
+    schemas: transfer
+    table: money_transfer_flyway_update_history
+    baseline-on-migrate: true
+    validateOnMigrate: false
+
+
+retry:
+  transfer:
+    maxAttempts: 10
+
+app-transfer:
+  transfers-pool-size: "10"
+  pool-time-out: "1000"
