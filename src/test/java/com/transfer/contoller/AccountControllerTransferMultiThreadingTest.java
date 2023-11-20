@@ -54,7 +54,7 @@ class AccountControllerTransferMultiThreadingTest {
 
         int taskTimeOutSeconds = 1;
 
-        AccountDataModel dataBeforeCall = getAccountData("init/json/transfer_AABB1122.json");
+        AccountDataModel dataBeforeCall = getAccountData("init/json/transfer_pool_AABB1122.json");
         String pathToTransferEndpointh = "/rest/api/v1/account/transfer";
         String transferJson = dataBeforeCall.transferJson();
 
@@ -70,7 +70,7 @@ class AccountControllerTransferMultiThreadingTest {
 
         int taskTimeOutSeconds = 1;
 
-        AccountDataModel dataBeforeCall = getAccountData("init/json/transfer_AABB1122.json");
+        AccountDataModel dataBeforeCall = getAccountData("init/json/transfer_pool_AABB1122.json");
         String pathToTransferEndpointh = "/rest/api/v1/account/transfer/pool";
         String transferJson = dataBeforeCall.transferJson();
 
@@ -119,7 +119,7 @@ class AccountControllerTransferMultiThreadingTest {
 
     private void checkSuccessTransaction(Account accountBeforeCall, Account accountAfterCall, TransferReqDto transfer, int poolSize, long transactionCountBeforeCall) {
 
-        assertThat(transactionRepository.count()).isEqualTo(transactionCountBeforeCall + poolSize);
+        assertThat(transactionRepository.count()).isEqualTo(transactionCountBeforeCall + (poolSize * 2));
         assertThat(accountAfterCall.getOptLockVersion()).isEqualTo(accountBeforeCall.getOptLockVersion() + poolSize);
 
         BigDecimal fullTransfersAmount = transfer.getAmount().multiply(BigDecimal.valueOf(poolSize));
@@ -139,9 +139,9 @@ class AccountControllerTransferMultiThreadingTest {
         @Override
         public Boolean call() throws Exception {
             try {
-                log.info("Start TransferExecutor thread name: {}, Current time: {}", Thread.currentThread().getName(), System.currentTimeMillis());
+//                log.info("Start TransferExecutor thread name: {}, Current time: {}", Thread.currentThread().getName(), System.currentTimeMillis());
                 transferCallSingle();
-                log.info("Finish TransferExecutor thread name: {}, Current time: {}", Thread.currentThread().getName(), System.currentTimeMillis());
+//                log.info("Finish TransferExecutor thread name: {}, Current time: {}", Thread.currentThread().getName(), System.currentTimeMillis());
                 return true;
             } catch (Exception e) {
                 log.error("Error call transfer. Tread name: {}, Reason: {}",
@@ -154,11 +154,12 @@ class AccountControllerTransferMultiThreadingTest {
             mockMvc.perform(post(pathToTransferEndpointh)
                             .contentType(APPLICATION_JSON)
                             .content(transferJson))
-                    .andDo(print())
+//                    .andDo(print())
                     .andExpect(status().is2xxSuccessful())
                     .andExpect(content().contentType(APPLICATION_JSON))
                     .andExpect(jsonPath("message").value("Success"))
-                    .andExpect(jsonPath("transaction-id").exists());
+                    .andExpect(jsonPath("transaction-id-src").exists())
+                    .andExpect(jsonPath("transaction-id-dest").exists());
         }
 
 

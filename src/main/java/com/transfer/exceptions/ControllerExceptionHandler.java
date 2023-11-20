@@ -3,7 +3,7 @@
  * file 'LICENSE.txt', which is part of this source code package.
  */
 
-package com.transfer.contoller;
+package com.transfer.exceptions;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,12 @@ import java.util.NoSuchElementException;
 @ControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class, NoSuchElementException.class})
+    @ExceptionHandler(value = {IllegalArgumentException.class,
+            IllegalStateException.class,
+            NoSuchElementException.class,
+            NoSuchAccountException.class,
+            NotEnoughMoneyException.class,
+            WrongCurrencyException.class})
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = String.format("Error processing request. Reason: %s", ex.getMessage());
         log.error(bodyOfResponse);

@@ -48,7 +48,7 @@ public class TransferPoolThreadsServiceImpl implements TransferService {
 
     public TransferRespDto applyTransfer(TransferReqDto transferReqDto) {
 
-        int pos = Math.abs(transferReqDto.getDestAccountSerial().hashCode()) % (transfersPool.length - 1);
+        int pos = Math.abs(transferReqDto.getSrcAccountSerial().hashCode()) % (transfersPool.length - 1);
         log.debug("Position in arr: {}, arr.size: {}, transferReqDto: {}", pos, transfersPool.length, transferReqDto);
 
         List<Future<TransferRespDto>> transferResponse;

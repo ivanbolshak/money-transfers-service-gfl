@@ -55,8 +55,9 @@ public class TestUtils {
 
     public static TransferRespDto createTransferRespDto() {
         return TransferRespDto.builder()
-                .message("Sucess")
-                .transactionId(UUID.randomUUID())
+                .message("Sucсess")
+                .transactionIdSrc(UUID.randomUUID())
+                .transactionIdDest(UUID.randomUUID())
                 .build();
     }
 }

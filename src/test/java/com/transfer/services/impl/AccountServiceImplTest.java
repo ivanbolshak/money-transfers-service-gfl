@@ -1,5 +1,6 @@
 package com.transfer.services.impl;
 
+import com.transfer.exceptions.NotEnoughMoneyException;
 import com.transfer.model.entity.Account;
 import com.transfer.repository.AccountRepository;
 import com.transfer.services.AccountService;
@@ -39,9 +40,20 @@ class AccountServiceImplTest {
 
     @Test
     void addTransferAmountToCurrentBalance_testNegativeAmount() {
-        assertThrows(IllegalArgumentException.class, () -> testable.addTransferAmountToCurrentBalance(BigDecimal.valueOf(-4L), "tttt"));
-        assertThrows(IllegalArgumentException.class, () -> testable.addTransferAmountToCurrentBalance(BigDecimal.valueOf(-4L), new Account()));
+        assertThrows(IllegalArgumentException.class, () -> testable.addAmountToBalance(BigDecimal.valueOf(-4L), "tttt"));
+        assertThrows(IllegalArgumentException.class, () -> testable.addAmountToBalance(BigDecimal.valueOf(-4L), new Account()));
     }
+
+    @Test
+    void subtractAmountFromBalance_testNegativeBalance() {
+        Account account = Account.builder()
+                .balance(BigDecimal.valueOf(5L))
+                .build();
+
+        assertThrows(NotEnoughMoneyException.class, () -> testable.subtractAmountFromBalance(BigDecimal.valueOf(10L), account));
+    }
+
+
 
 
 }

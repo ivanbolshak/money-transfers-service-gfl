@@ -81,6 +81,20 @@ class AccountControllerTest {
     }
 
     @Test
+    void transferMoneyNotEnoughAmount_single_error() throws Exception {
+
+        final File transferFile = new ClassPathResource("init/json/transfer_not_enough_amount_exception_AABB1122.json").getFile();
+        String transferJson = Files.readString(transferFile.toPath());
+
+        this.mockMvc.perform(post("/rest/api/v1/account/transfer")
+                        .contentType(APPLICATION_JSON)
+                        .content(transferJson))
+                .andDo(print())
+                .andExpect(status().is5xxServerError())
+        ;
+    }
+
+    @Test
     void transferPoolMoney_single_success() throws Exception {
         AccountDataModel dataBeforeCall = getAccountData("init/json/transfer_AABB1122.json");
         callToAccountTransfer(dataBeforeCall, "/rest/api/v1/account/transfer/pool");
@@ -180,7 +194,7 @@ class AccountControllerTest {
 
         long accountsBefore = accountRepository.count();
 
-        this.mockMvc.perform(delete("/rest/api/v1/account/" + "BBDD2211")
+        this.mockMvc.perform(delete("/rest/api/v1/account/" + "AACC1133")
                         .contentType(APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful())
@@ -208,12 +222,13 @@ class AccountControllerTest {
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("message").value("Success"))
-                .andExpect(jsonPath("transaction-id").exists());
+                .andExpect(jsonPath("transaction-id-src").exists())
+                .andExpect(jsonPath("transaction-id-dest").exists());
     }
 
     private void checkSuccessTransaction(Account accountBeforeCall, Account accountAfterCall, List<TransferReqDto> transfers, long transactionCountBeforeCall) {
 
-        assertThat(transactionRepository.count()).isEqualTo(transactionCountBeforeCall + transfers.size());
+        assertThat(transactionRepository.count()).isEqualTo(transactionCountBeforeCall + (transfers.size() * 2));
         assertThat(accountAfterCall.getOptLockVersion()).isEqualTo(accountBeforeCall.getOptLockVersion() + transfers.size());
 
         BigDecimal fullTransfersAmount = transfers.stream().map(TransferReqDto::getAmount).reduce(BigDecimal::add).orElseThrow();

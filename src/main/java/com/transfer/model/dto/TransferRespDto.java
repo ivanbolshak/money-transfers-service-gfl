@@ -17,6 +17,9 @@ public class TransferRespDto {
 
     private String message;
 
-    @JsonProperty("transaction-id")
-    private UUID transactionId;
+    @JsonProperty("transaction-id-src")
+    private UUID transactionIdSrc;
+
+    @JsonProperty("transaction-id-dest")
+    private UUID transactionIdDest;
 }

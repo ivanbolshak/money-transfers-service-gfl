@@ -5,6 +5,8 @@
 
 package com.transfer.services.impl;
 
+import com.transfer.exceptions.NoSuchAccountException;
+import com.transfer.exceptions.WrongCurrencyException;
 import com.transfer.model.dto.TransferReqDto;
 import com.transfer.model.dto.TransferRespDto;
 import com.transfer.model.entity.Account;
@@ -36,25 +38,53 @@ public class TransferServiceImpl implements TransferService {
     @Transactional
     @Retryable(retryFor = StaleObjectStateException.class, maxAttemptsExpression = "${retry.transfer.maxAttempts}")
     public TransferRespDto applyTransfer(TransferReqDto transferReqDto) {
-
-        Account account = accountService.getAccountBySerial(transferReqDto.getDestAccountSerial())
+//step 1 subtract amount from src account
+        Account accountSrc = accountService.getAccountBySerial(transferReqDto.getSrcAccountSerial())
                 .orElseThrow(() ->
-                        new IllegalArgumentException(String.format("Current dest-account-serial ( %s ) absent in DB", transferReqDto.getDestAccountSerial())));
-
-        if (account.getCurrencyDigitalCode() != transferReqDto.getCurrencyDigitalCode()) {
-            throw new IllegalArgumentException(String.format("Transaction got wrong currency. Expected: %s, Actual: %s", account.getCurrencyDigitalCode(), transferReqDto.getCurrencyDigitalCode()));
+                        new NoSuchAccountException(transferReqDto.getSrcAccountSerial()));
+        //checking currency
+        if (accountSrc.getCurrencyDigitalCode() != transferReqDto.getCurrencyDigitalCode()) {
+            throw new WrongCurrencyException(accountSrc.getCurrencyDigitalCode(), transferReqDto.getCurrencyDigitalCode());
         }
 
-        Transaction transaction = customMapper.fromTransferDtoToNewTransactionEntity(transferReqDto, account);
-        Transaction persistanceTransaction = transactionService.saveNew(transaction);
-        persistanceTransaction.setAccount(account);
+        accountService.subtractAmountFromBalance(transferReqDto.getAmount(), accountSrc);
 
-        accountService.addTransferAmountToCurrentBalance(persistanceTransaction.getAmount(), account);
+        Transaction transactionForAccountSrc = customMapper.fromTransferDtoToNewTransactionEntity(transferReqDto, accountSrc);
+        Transaction persistenceTransactionSrc = transactionService.saveNew(transactionForAccountSrc);
+
+        persistenceTransactionSrc.setAccount(accountSrc);
+
+// Step 2 add amount to dest account
+        Account accountDest = accountService.getAccountBySerial(transferReqDto.getDestAccountSerial())
+                .orElseThrow(() ->
+                        new NoSuchAccountException(transferReqDto.getDestAccountSerial()));
+
+        //checking currency
+        if (accountDest.getCurrencyDigitalCode() != transferReqDto.getCurrencyDigitalCode()) {
+            throw new WrongCurrencyException(accountDest.getCurrencyDigitalCode(), transferReqDto.getCurrencyDigitalCode());
+        }
+
+        Transaction transactionForAccountDest = customMapper.fromTransferDtoToNewTransactionEntity(transferReqDto, accountDest);
+
+        //checking amount in dest and src persistence transaction entity
+        if (!transactionForAccountsHaveTheSameAmount(transactionForAccountSrc, transactionForAccountDest)) {
+            throw new IllegalArgumentException("Persistence Transactions have different amount");
+        }
+
+        Transaction persistenceTransactionDest = transactionService.saveNew(transactionForAccountDest);
+        persistenceTransactionDest.setAccount(accountDest);
+
+        accountService.addAmountToBalance(persistenceTransactionSrc.getAmount(), accountDest);
 
         log.debug("Trying to update balance  for transferReqDto: {}", transferReqDto);
         return TransferRespDto.builder()
                 .message("Success")
-                .transactionId(persistanceTransaction.getUuid())
+                .transactionIdSrc(transactionForAccountSrc.getUuid())
+                .transactionIdDest(transactionForAccountDest.getUuid())
                 .build();
+    }
+
+    private boolean transactionForAccountsHaveTheSameAmount(Transaction transactionForAccountSrc, Transaction transactionForAccountDest) {
+        return transactionForAccountSrc.getAmount().compareTo(transactionForAccountDest.getAmount()) == 0;
     }
 }

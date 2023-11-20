@@ -5,6 +5,9 @@
 
 package com.transfer.utils;
 
+import com.transfer.exceptions.NoSuchAccountException;
+import com.transfer.exceptions.NotEnoughMoneyException;
+import com.transfer.exceptions.WrongCurrencyException;
 import com.transfer.model.dto.TransferRespDto;
 
 import java.util.Optional;
@@ -18,8 +21,8 @@ public class CustomFutureUtils {
     public static Optional<TransferRespDto> getFromFutures(Future<TransferRespDto> f, Long timeOut) {
         try {
             return Optional.of(f.get(timeOut, TimeUnit.MILLISECONDS));
-        } catch (IllegalArgumentException el) {
-            throw  new IllegalArgumentException("IllegalArgumentException got. Message: {}" + el.getMessage());
+        } catch (IllegalArgumentException | NoSuchAccountException | NotEnoughMoneyException | WrongCurrencyException ex) {
+            throw  new IllegalArgumentException("IllegalArgumentException got. Message: {}" + ex.getMessage());
         } catch (Exception e) {
             throw  new IllegalArgumentException("Failed to get from futures. Reason: {}" + e.getMessage());
         }

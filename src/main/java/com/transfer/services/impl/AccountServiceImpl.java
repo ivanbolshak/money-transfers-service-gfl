@@ -6,6 +6,8 @@
 
 package com.transfer.services.impl;
 
+import com.transfer.exceptions.NoSuchAccountException;
+import com.transfer.exceptions.NotEnoughMoneyException;
 import com.transfer.model.dto.AccountDetailsDto;
 import com.transfer.model.dto.AccountDto;
 import com.transfer.model.entity.Account;
@@ -20,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -45,17 +46,38 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional
     @Override
-    public void addTransferAmountToCurrentBalance(BigDecimal amount, String accountSerial) {
+    public void subtractAmountFromBalance(BigDecimal amount, String accountSerial) {
+        amountIsNotNegativeValidation(amount);
+        Account account = accountRepository.getAccountBySerial(accountSerial).orElseThrow(() -> new NoSuchAccountException(accountSerial));
+        this.subtractAmountFromBalance(amount, account);
+    }
+
+    @Transactional
+    @Override
+    public void subtractAmountFromBalance(BigDecimal amount, Account account) {
         amountIsNotNegativeValidation(amount);
 
-        Account account = accountRepository.getAccountBySerial(accountSerial).orElseThrow(() -> new NoSuchElementException(String.format("No such account serial ( %s ) in db", accountSerial)));
+        if (account.getBalance().compareTo(amount) < 0){  //checking the balance during subtraction
+            throw new NotEnoughMoneyException(account.getSerial(), amount);
+        }
+
+        BigDecimal newBalance = account.getBalance().subtract(amount);
+        account.setBalance(newBalance);
+    }
+
+    @Transactional
+    @Override
+    public void addAmountToBalance(BigDecimal amount, String accountSerial) {
+        amountIsNotNegativeValidation(amount);
+
+        Account account = accountRepository.getAccountBySerial(accountSerial).orElseThrow(() -> new NoSuchAccountException(accountSerial));
         BigDecimal newBalance = account.getBalance().add(amount);
         account.setBalance(newBalance);
     }
 
     @Transactional
     @Override
-    public void addTransferAmountToCurrentBalance(BigDecimal amount, Account account) {
+    public void addAmountToBalance(BigDecimal amount, Account account) {
         amountIsNotNegativeValidation(amount);
 
         BigDecimal newBalance = account.getBalance().add(amount);

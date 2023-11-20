@@ -1,6 +1,7 @@
 package com.transfer.services.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.transfer.exceptions.NoSuchAccountException;
+import com.transfer.exceptions.WrongCurrencyException;
 import com.transfer.model.dto.TransferReqDto;
 import com.transfer.model.dto.TransferRespDto;
 import com.transfer.model.entity.Account;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import static com.transfer.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +50,7 @@ class TransferServiceImplTest {
         Account account = createAccount();
         Transaction transaction = createTransaction();
 
-        when(accountService.getAccountBySerial(transferReqDto.getDestAccountSerial()))
+        when(accountService.getAccountBySerial(any()))
                 .thenReturn(Optional.of(account));
         when(customMapper.fromTransferDtoToNewTransactionEntity(transferReqDto, account))
                 .thenReturn(transaction);
@@ -57,7 +59,7 @@ class TransferServiceImplTest {
         TransferRespDto response = transferService.applyTransfer(transferReqDto);
 
         assertEquals("Success", response.getMessage());
-        verify(accountService).addTransferAmountToCurrentBalance(transaction.getAmount(), account);
+        verify(accountService).addAmountToBalance(transaction.getAmount(), account);
     }
 
     @Test
@@ -66,7 +68,7 @@ class TransferServiceImplTest {
         when(accountService.getAccountBySerial(transferReqDto.getDestAccountSerial()))
                 .thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> transferService.applyTransfer(transferReqDto));
+        assertThrows(NoSuchAccountException.class, () -> transferService.applyTransfer(transferReqDto));
     }
 
     @Test
@@ -78,7 +80,10 @@ class TransferServiceImplTest {
         when(accountService.getAccountBySerial(transferReqDto.getDestAccountSerial()))
                 .thenReturn(Optional.of(account));
 
-        assertThrows(IllegalArgumentException.class, () -> transferService.applyTransfer(transferReqDto));
+        when(accountService.getAccountBySerial(transferReqDto.getSrcAccountSerial()))
+                .thenReturn(Optional.of(account));
+
+        assertThrows(WrongCurrencyException.class, () -> transferService.applyTransfer(transferReqDto));
     }
 
 }
